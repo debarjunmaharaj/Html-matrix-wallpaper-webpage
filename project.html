@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Glitch - Golden Edition</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1; /* Canvas is at the back */
+        }
+        .content {
+            position: relative;
+            z-index: 10; /* Text is on top */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* COLOR CHANGE: Main text color is now gold */
+            color: #FFD700;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 2.5rem;
+            /* COLOR CHANGE: Default text shadow is now a fiery golden glow */
+            text-shadow: 0 0 15px #FFD700, 0 0 25px #ff8c00;
+
+            /* Add transitions for the glitch effect */
+            transition: transform 0.1s, text-shadow 0.1s;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="content">
+        <!-- Added an ID for easy selection in JavaScript -->
+        <p id="glitch-text">Welcome to the Matrix<br>Debarjun...</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const characters = 'ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम् । उर्वारुकमिव बन्धनान् मृत्योर्मुक्षीय मामृतात् 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const charactersArray = characters.split('');
+
+        const fontSize = 16;
+        const columns = Math.floor(canvas.width / fontSize);
+
+        // MODIFICATION: Each drop is now an object with y-pos and speed
+        const drops = [];
+        for (let x = 0; x < columns; x++) {
+            drops[x] = {
+                y: Math.random() * canvas.height,
+                speed: Math.random() * 4 + 1 // Random speed between 1 and 5
+            };
+        }
+
+        function drawMatrix() {
+            // Fading effect for the trails
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Set font for the characters
+            ctx.font = `${fontSize}px 'Courier New', monospace`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const drop = drops[i];
+                const text = charactersArray[Math.floor(Math.random() * charactersArray.length)];
+                
+                // Calculate position
+                const x = i * fontSize;
+                const y = drop.y;
+
+                // COLOR CHANGE: Draw the trail character in a warm amber color
+                ctx.fillStyle = '#ff9933';
+                ctx.fillText(text, x, y);
+
+                // COLOR CHANGE: Draw the bright "leader" character in a brilliant white-gold
+                ctx.fillStyle = '#fff8e1'; 
+                ctx.fillText(text, x, y);
+
+                // Reset drop or move it down
+                if (y > canvas.height && Math.random() > 0.98) {
+                    drop.y = 0; // Reset to the top
+                    drop.speed = Math.random() * 4 + 1; // Assign a new random speed
+                } else {
+                    drop.y += drop.speed;
+                }
+            }
+        }
+        
+        // --- TEXT GLITCH EFFECT ---
+
+        const glitchElement = document.getElementById('glitch-text');
+        const originalText = glitchElement.innerHTML; // Use innerHTML to preserve <br>
+        let isGlitching = false;
+        let glitchInterval;
+
+        function scrambleText() {
+            let scrambled = '';
+            const textParts = originalText.split('<br>');
+            
+            textParts.forEach((part, index) => {
+                let scrambledPart = '';
+                for (let i = 0; i < part.length; i++) {
+                    if (part[i] === ' ' || Math.random() > 0.15) {
+                        scrambledPart += part[i];
+                    } else {
+                        scrambledPart += charactersArray[Math.floor(Math.random() * charactersArray.length)];
+                    }
+                }
+                scrambled += scrambledPart;
+                if (index < textParts.length - 1) {
+                    scrambled += '<br>';
+                }
+            });
+
+            glitchElement.innerHTML = scrambled;
+        }
+
+        function startGlitch() {
+            if (isGlitching) return;
+            isGlitching = true;
+
+            // Apply visual distortion styles
+            const x = (Math.random() - 0.5) * 8;
+            const y = (Math.random() - 0.5) * 8;
+            glitchElement.style.transform = `translate(${x}px, ${y}px)`;
+            // The glitch itself remains red/cyan for that classic digital corruption look
+            glitchElement.style.textShadow = `
+                ${(Math.random() - 0.5) * 15}px 0 10px rgba(255, 0, 0, 0.7), 
+                ${(Math.random() - 0.5) * 15}px 0 10px rgba(0, 255, 255, 0.7)`;
+
+            glitchInterval = setInterval(scrambleText, 50); // Scramble text rapidly
+
+            // Stop the glitch after a short duration
+            setTimeout(stopGlitch, Math.random() * 200 + 100);
+        }
+
+        function stopGlitch() {
+            isGlitching = false;
+            clearInterval(glitchInterval);
+            glitchElement.innerHTML = originalText; // Restore original text
+            glitchElement.style.transform = 'translate(0, 0)'; // Reset position
+            // COLOR CHANGE: Reset the shadow back to the default golden glow
+            glitchElement.style.textShadow = '0 0 15px #FFD700, 0 0 25px #ff8c00';
+        }
+
+        // --- Animation Loops ---
+
+        // Start the matrix rain animation
+        setInterval(drawMatrix, 50);
+
+        // Start the periodic glitching of the text
+        setInterval(startGlitch, 3000); // Trigger a glitch every 3 seconds
+
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const newColumns = Math.floor(canvas.width / fontSize);
+            drops.length = 0;
+            for (let x = 0; x < newColumns; x++) {
+                 drops[x] = {
+                    y: Math.random() * canvas.height,
+                    speed: Math.random() * 4 + 1
+                };
+            }
+        });
+
+    </script>
+</body>
+</html>
